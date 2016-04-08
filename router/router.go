@@ -5,7 +5,7 @@ import (
 	"github.com/AntonYaskevich/lu-server/middlewares"
 )
 
-func CreateEngine() *gin.Engine {
+func CreateRouterEngine() *gin.Engine {
 	engine := gin.Default();
 
 	api := engine.Group("/api/v1");
@@ -17,12 +17,7 @@ func CreateEngine() *gin.Engine {
 	auth := api.Group("/")
 	auth.Use(middlewares.Auth("key"))
 
-	users := auth.Group("/users")
-	{
-		users.GET("/")
-		users.GET("/:id")
-		users.PUT("/:id")
-		users.DELETE("/:id")
-	}
+	BindUserRoutes(auth)
+
 	return engine
 }
