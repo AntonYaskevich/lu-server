@@ -2,6 +2,7 @@ package routers
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/AntonYaskevich/lu-server/middlewares"
 )
 
 func CreateEngine() *gin.Engine {
@@ -14,6 +15,7 @@ func CreateEngine() *gin.Engine {
 	}
 
 	auth := api.Group("/")
+	auth.Use(middlewares.Auth("key"))
 
 	users := auth.Group("/users")
 	{
