@@ -19,7 +19,8 @@ func (self *UserDB) Create(user *models.User) (*models.User, error) {
 
 	result := [] models.User{}
 	query := neoism.CypherQuery{
-		Statement:`CREATE (node:User {username: {username}, password: {password}}) RETURN id(node), node.username, node.password`,
+		Statement:`CREATE (node:User {username: {username}, password: {password}})
+		 	   RETURN id(node) as id, node.username as username, node.password as password`,
 		Parameters: neoism.Props{"username": user.Username, "password": pass},
 		Result: &result,
 	}
