@@ -23,13 +23,16 @@ func (self *UserDB) Create(user *models.User) (*models.User, error) {
 	query := neoism.CypherQuery{
 		Statement:`CREATE (node:User {username: {username}, password: {password}})
 		 	   RETURN id(node) as id, node.username as username, node.password as password`,
-		Parameters: neoism.Props{"username": user.Username, "password": pass},
+		Parameters: neoism.Props{"username": user.Username, "password": string(pass[:])},
 		Result: &result,
 	}
 	dberr := base.Transactional(self.Database, &query)
 	if dberr != nil {
 		log.Println(dberr)
 		return nil, dberr
+	}
+	if (len(result) == 0) {
+		return nil, nil
 	}
 	return &result[0], nil;
 }
@@ -49,7 +52,9 @@ func (self *UserDB) Read(id uint) (*models.User, error) {
 		log.Println(err)
 		return nil, err
 	}
-
+	if (len(result) == 0) {
+		return nil, nil
+	}
 	return &result[0], nil;
 }
 
@@ -69,6 +74,9 @@ func (self *UserDB) Update(user *models.User) (*models.User, error) {
 		log.Println(dberr)
 		return nil, dberr
 	}
+	if (len(result) == 0) {
+		return nil, nil
+	}
 	return &result[0], nil;
 }
 
@@ -81,5 +89,27 @@ func (self *UserDB) Delete(id uint) error {
 	}
 
 	return base.Transactional(self.Database, &query);
+}
+
+func (self *UserDB) ReadByUsername(username string) (*models.User, error) {
+	result := [] models.User{}
+	query := neoism.CypherQuery{
+		Statement:`MATCH (n:User)
+		 	   WHERE n.username = {username}
+		 	   RETURN id(n) as id, n.username as username, n.password as password`,
+		Parameters: neoism.Props{"username": username},
+		Result: &result,
+	}
+
+	err := self.Database.Cypher(&query)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	if (len(result) == 0) {
+		return nil, nil
+	}
+
+	return &result[0], nil;
 }
 
