@@ -80,7 +80,7 @@ func (self *UserDB) Update(user *models.User) (*models.User, error) {
 	return &result[0], nil;
 }
 
-func (self *UserDB) Delete(id uint) error {
+func (self *UserDB) Delete(id uint) gierror {
 	query := neoism.CypherQuery{
 		Statement:`MATCH (n:User)
 		 	   WHERE id(n) = {id}
@@ -89,6 +89,26 @@ func (self *UserDB) Delete(id uint) error {
 	}
 
 	return base.Transactional(self.Database, &query);
+}
+
+func (self *UserDB) GetAll() ([] models.User, error) {
+	result := [] models.User{}
+	query := neoism.CypherQuery{
+		Statement:`MATCH (n:User)
+		 	   RETURN id(n) as id, n.username as username, n.password as password`,
+		Result: &result,
+	}
+
+	err := self.Database.Cypher(&query)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	if (len(result) == 0) {
+		return nil, nil
+	}
+
+	return &result, nil;
 }
 
 func (self *UserDB) ReadByUsername(username string) (*models.User, error) {

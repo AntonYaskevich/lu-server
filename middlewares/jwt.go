@@ -7,6 +7,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const (
+	ID = "_id"
+)
+
 func Auth(key string) *gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token, err := jwt.ParseFromRequest(c.Request, func(token *jwt.Token) (interface{}, error) {
@@ -17,7 +21,8 @@ func Auth(key string) *gin.HandlerFunc {
 			c.AbortWithError(http.StatusUnauthorized, err)
 			return
 		}
-
+		userId := token.Claims[ID]
+		c.Set(ID, userId)
 		c.Next()
 	}
 }
